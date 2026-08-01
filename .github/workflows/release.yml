@@ -1,0 +1,27 @@
+name: Package and Release
+
+# Runs whenever you push a version tag (e.g. `v1.0`, `v1.1`).
+on:
+  push:
+    tags:
+      - '**'
+
+permissions:
+  contents: write   # needed to create the GitHub Release and attach the zip
+
+jobs:
+  package-and-release:
+    name: Package and release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the packager can build a changelog
+
+      - name: Package and release
+        uses: BigWigsMods/packager@master
+        env:
+          # Add these in your repo: Settings -> Secrets and variables -> Actions
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}       # CurseForge upload token
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}   # provided automatically by GitHub

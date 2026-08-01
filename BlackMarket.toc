@@ -4,5 +4,6 @@
 ## Author: A10-Studios
 ## Version: 1.0
 ## SavedVariables: BlackMarketDB
+## X-Curse-Project-ID: REPLACE_WITH_PROJECT_ID
 
 BlackMarket.lua

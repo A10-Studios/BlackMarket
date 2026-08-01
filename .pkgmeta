@@ -1,0 +1,12 @@
+# BigWigs packager metadata: https://github.com/BigWigsMods/packager
+package-as: BlackMarket
+
+# We have no external library dependencies, so skip the no-lib zip variant.
+enable-nolib-creation: no
+
+# Files kept in the repo but excluded from the packaged addon zip.
+ignore:
+  - .github
+  - .gitignore
+  - .pkgmeta
+  - README.md
