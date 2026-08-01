@@ -10,3 +10,4 @@ ignore:
   - .gitignore
   - .pkgmeta
   - README.md
+  - logo.png   # CurseForge project avatar, not needed inside the addon zip
