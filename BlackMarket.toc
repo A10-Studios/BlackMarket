@@ -4,6 +4,7 @@
 ## Author: A10-Studios
 ## Version: 1.0
 ## SavedVariables: BlackMarketDB
+## IconTexture: Interface\AddOns\BlackMarket\Icons\Logo.png
 ## X-Curse-Project-ID: REPLACE_WITH_PROJECT_ID
 
 BlackMarket.lua
