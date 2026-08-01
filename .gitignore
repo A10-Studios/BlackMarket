@@ -1,0 +1,14 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*~
+.vscode/
+.idea/
+
+# WoW / packaging artifacts
+*.zip
+.release/

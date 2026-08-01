@@ -1,0 +1,8 @@
+## Interface: 120005
+## Title: BlackMarket
+## Notes: Custom Black Market Auction House UI
+## Author: A10-Studios
+## Version: 1.0
+## SavedVariables: BlackMarketDB
+
+BlackMarket.lua
