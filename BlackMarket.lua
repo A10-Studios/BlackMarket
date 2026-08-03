@@ -2844,7 +2844,23 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         BM.items       = {}
         BM.numItems    = 0
         BM.selectedIndex = nil
-        BM.filters     = { name = "", itemType = {}, timeLeft = {}, collected = {}, bid = {}, watched = {} }
+        -- Filters persist across sessions: point BM.filters directly at a saved
+        -- table so every filter mutation writes through and is restored on login.
+        BlackMarketDB = BlackMarketDB or {}
+        BlackMarketDB.filters = BlackMarketDB.filters or {}
+        local sf = BlackMarketDB.filters
+        sf.name      = sf.name      or ""
+        sf.itemType  = sf.itemType  or {}
+        sf.timeLeft  = sf.timeLeft  or {}
+        sf.collected = sf.collected or {}
+        sf.bid       = sf.bid       or {}
+        sf.watched   = sf.watched   or {}
+        BM.filters   = sf
+        -- Restore the saved search text (programmatic SetText won't clobber the
+        -- value; the OnTextChanged handler only reacts to actual user input).
+        if BM.filterBar and BM.filterBar.searchBox then
+            BM.filterBar.searchBox:SetText(sf.name)
+        end
         BM.scrollAreaHeight = MAX_VISIBLE_ROWS * ROW_HEIGHT
         UpdateFiltersBtn()
 
