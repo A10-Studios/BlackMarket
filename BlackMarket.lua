@@ -5,6 +5,19 @@ local ADDON_NAME = "BlackMarket"
 local BM = {}
 _G[ADDON_NAME] = BM
 
+-- ============================================================
+-- CLIENT COMPATIBILITY
+-- ============================================================
+-- Retail and WoW Forever (1.60.x) share most of the retail API surface, but a
+-- few item functions exist as a global on one client and only under C_Item on
+-- the other. Resolve each once here, preferring the existing global so retail
+-- keeps its current code path unchanged, then fall back to the C_Item
+-- namespace. Call sites must still nil-check, since a client may expose
+-- neither and should degrade rather than error.
+
+local GetItemInfo  = _G.GetItemInfo  or (C_Item   and C_Item.GetItemInfo)
+local PlayerHasToy = _G.PlayerHasToy or (C_ToyBox and C_ToyBox.PlayerHasToy)
+
 -- Forward-declared locals used across multiple sections
 local _countdownTicker    = nil
 local _filterDropdown     = nil   -- shared dropdown for Type filter
@@ -1900,6 +1913,7 @@ end
 -- bindType from GetItemInfo: 1=BOP, 2=BOE, 3=BOA(warbound), 4=BNET(warbound)
 local function GetItemBindType(itemLink)
     if not itemLink then return "bop" end
+    if not GetItemInfo then return "bop" end
     local bindType = select(14, GetItemInfo(itemLink))
     if bindType == 2 then return "boe" end
     if bindType == 3 or bindType == 4 then return "warbound" end
@@ -1939,7 +1953,7 @@ GetCollectedStatus = function(itemLink, typeLabel)
     -- Toys: detect by API (BMAH typeLabel may not read "Toy")
     if C_ToyBox and C_ToyBox.GetToyInfo then
         if C_ToyBox.GetToyInfo(itemID) then
-            return PlayerHasToy(itemID) and "collected" or "learnable"
+            return (PlayerHasToy and PlayerHasToy(itemID)) and "collected" or "learnable"
         end
     end
 
@@ -2811,7 +2825,29 @@ SlashCmdList["BMTEST"] = function()
     C_Timer.After(5, function() BM.FireWinAlert() end)
 end
 
--- Debug: /bmdebug â€" dumps all raw return values from GetItemInfoByIndex
+-- /bmcompat — reports which client APIs this build exposes. Used to pin down
+-- retail vs WoW Forever differences without guessing.
+SLASH_BMCOMPAT1 = "/bmcompat"
+SlashCmdList["BMCOMPAT"] = function()
+    local function chk(label, v)
+        print(string.format("  %s: %s", label, v and "|cff44ff44yes|r" or "|cffff4444NO|r"))
+    end
+    print("|cffffd700BlackMarket compat:|r build " .. tostring((GetBuildInfo and GetBuildInfo()) or "?"))
+    chk("_G.GetItemInfo",            _G.GetItemInfo)
+    chk("C_Item.GetItemInfo",        C_Item and C_Item.GetItemInfo)
+    chk("_G.PlayerHasToy",           _G.PlayerHasToy)
+    chk("C_ToyBox",                  C_ToyBox)
+    chk("C_TransmogCollection",      C_TransmogCollection)
+    chk("C_MountJournal",            C_MountJournal)
+    chk("C_PetJournal",              C_PetJournal)
+    chk("C_BlackMarket",             C_BlackMarket)
+    chk("C_BlackMarket.RequestItems", C_BlackMarket and C_BlackMarket.RequestItems)
+    chk("FlashClientIcon",           _G.FlashClientIcon)
+    chk("BreakUpLargeNumbers",       _G.BreakUpLargeNumbers)
+    chk("SOUNDKIT.RAID_WARNING",     SOUNDKIT and SOUNDKIT.RAID_WARNING)
+end
+
+-- /bmdebug — dumps all raw return values from GetItemInfoByIndex
 SLASH_BMDEBUG1 = "/bmdebug"
 SlashCmdList["BMDEBUG"] = function()
     local num = C_BlackMarket.GetNumItems() or 0
